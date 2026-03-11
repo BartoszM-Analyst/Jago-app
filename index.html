@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#FF6B6B"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="JAGO AI"/>
+<meta name="description" content="Generator contentu social media dla JAGO"/>
+<title>JAGO AI – Content Generator</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --bg: #0c0c0c;
+  --bg2: #161616;
+  --bg3: #1e1e1e;
+  --border: #2a2a2a;
+  --text: #f0f0f0;
+  --muted: #666;
+  --dim: #3a3a3a;
+  --accent: #FF6B6B;
+  --accent2: #FF8E53;
+  --red: #FF0000;
+  --blue: #74c0fc;
+  --purple: #a78bfa;
+  --green: #a9e34b;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%; width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  overscroll-behavior: none;
+  overflow: hidden;
+}
+
+/* ── LAYOUT ── */
+#app {
+  display: flex; flex-direction: column;
+  height: 100dvh; width: 100%;
+  position: relative;
+}
+
+/* ── HEADER ── */
+#header {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 60%, #FFC107 100%);
+  padding: 14px 16px 12px;
+  padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; position: relative; overflow: hidden;
+}
+#header::before {
+  content: ''; position: absolute;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  top: -40px; right: -20px;
+}
+.header-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #fff; letter-spacing: 2px; }
+.header-sub { font-size: 10px; color: rgba(255,255,255,0.85); font-weight: 700; margin-top: 1px; }
+.header-icon { font-size: 28px; }
+
+/* ── SCROLL AREA ── */
+#scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 12px calc(80px + var(--safe-bottom));
+}
+
+/* ── BOTTOM NAV ── */
+#nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+  z-index: 100; flex-shrink: 0;
+}
+.nav-btn {
+  flex: 1; background: none; border: none;
+  padding: 10px 4px 8px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  color: var(--muted); transition: color .2s;
+}
+.nav-btn.active { color: var(--accent); }
+.nav-btn .nav-icon { font-size: 20px; }
+.nav-btn .nav-label { font-size: 9px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg2); border-radius: 16px;
+  border: 1px solid var(--border); padding: 16px;
+  margin-bottom: 12px; animation: fadeUp .3s ease;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── SECTION LABELS ── */
+.lbl {
+  font-family: 'Syne', sans-serif; font-size: 10px;
+  font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 10px;
+}
+
+/* ── PLATFORM GRID ── */
+.platform-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.platform-btn {
+  background: #111; border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 12px 6px;
+  cursor: pointer; transition: all .2s; text-align: center;
+}
+.platform-btn.active { transform: scale(1.04); }
+.platform-btn .p-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+.platform-btn .p-label { font-size: 10px; font-weight: 800; }
+
+/* ── POST TYPE GRID ── */
+.type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.type-btn {
+  background: #111; border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 12px 10px;
+  cursor: pointer; transition: all .2s; text-align: left;
+}
+.type-btn.active { border-color: var(--accent); background: rgba(255,107,107,.1); }
+.type-btn .t-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.type-btn .t-label { font-size: 12px; font-weight: 800; color: var(--muted); }
+.type-btn.active .t-label { color: var(--accent); }
+.type-btn .t-desc { font-size: 10px; color: var(--dim); margin-top: 2px; }
+
+/* ── SHORTS STRUCTURE ── */
+.struct-btn {
+  background: #111; border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px;
+  cursor: pointer; display: flex; align-items: center; gap: 10px;
+  margin-bottom: 6px; transition: all .15s; width: 100%;
+  text-align: left;
+}
+.struct-btn.active { border-color: var(--red); background: rgba(255,0,0,.08); }
+.struct-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); flex-shrink: 0; }
+.struct-btn.active .struct-dot { background: var(--red); }
+.struct-name { font-size: 13px; font-weight: 800; color: var(--muted); }
+.struct-btn.active .struct-name { color: #FF4444; }
+.struct-desc { font-size: 10px; color: var(--dim); margin-top: 1px; }
+
+/* ── QUICK TOPICS ── */
+.topics-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.topic-chip {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px;
+  border: 1px solid var(--border); background: #111;
+  color: var(--dim); font-weight: 700; cursor: pointer; transition: all .15s;
+  font-family: 'Nunito', sans-serif;
+}
+.topic-chip.active { border-color: var(--accent); background: rgba(255,107,107,.12); color: var(--accent); }
+
+/* ── INPUTS ── */
+.inp {
+  width: 100%; background: #111; border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 12px 14px; font-size: 14px;
+  font-family: 'Nunito', sans-serif; color: var(--text);
+  outline: none; transition: border .2s; display: block;
+}
+.inp:focus { border-color: var(--accent); }
+.inp::placeholder { color: var(--dim); }
+textarea.inp { resize: vertical; min-height: 70px; }
+
+/* ── API KEYS ── */
+.key-inp {
+  width: 100%; background: #0a0a0a; border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 10px 12px; font-size: 12px;
+  font-family: monospace; color: var(--text);
+  outline: none; transition: border .2s; display: block; margin-bottom: 4px;
+}
+
+/* ── GENERATE BUTTON ── */
+#gen-btn {
+  width: 100%; padding: 16px; border-radius: 16px; border: none;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px;
+  cursor: pointer; transition: all .3s; margin-bottom: 4px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+#gen-btn:disabled { background: #1a1a1a; color: #333; cursor: not-allowed; box-shadow: none; }
+
+/* ── AGENT PILLS ── */
+.agents-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: var(--bg2); border-radius: 14px; border: 1px solid var(--border); margin-bottom: 12px; }
+.apill { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1.5px solid var(--border); background: var(--bg); transition: all .3s; }
+.adot { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); }
+
+/* ── RESULT TABS ── */
+.res-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.res-tab { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; border: 1.5px solid var(--border); background: var(--bg2); color: var(--muted); cursor: pointer; transition: all .2s; font-family: 'Nunito', sans-serif; }
+.res-tab.active { border-color: var(--accent); background: rgba(255,107,107,.1); color: var(--accent); }
+
+/* ── RESULT CONTENT ── */
+.result-text { background: #0a0a0a; border-radius: 12px; padding: 16px; white-space: pre-wrap; line-height: 1.85; font-size: 14px; color: #e5e5e5; font-family: Georgia, serif; border: 1px solid #1f1f1f; word-break: break-word; }
+.copy-btn { background: transparent; border: 1.5px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; transition: all .2s; }
+.copy-btn.ok { background: #22c55e; border-color: #22c55e; color: #fff; }
+
+/* ── IMAGE ── */
+.gen-img { width: 100%; max-width: 300px; display: block; margin: 0 auto; border-radius: 14px; border: 2px solid rgba(116,192,252,.2); }
+
+/* ── VIDEO ── */
+.gen-video { width: 100%; max-width: 280px; display: block; margin: 0 auto; border-radius: 16px; border: 2px solid rgba(167,139,250,.2); aspect-ratio: 9/16; }
+.progress-bar { background: #111; border-radius: 8px; overflow: hidden; height: 5px; margin: 10px 0; border: 1px solid #1f1f1f; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), #818cf8); transition: width .5s; }
+
+/* ── STORYBOARD ── */
+.scene-item { display: flex; gap: 10px; position: relative; }
+.scene-num { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg,#FF0000,#FF6B6B); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #fff; flex-shrink: 0; }
+.scene-line { width: 2px; background: #222; flex: 1; min-height: 12px; align-self: stretch; margin: 2px 0; }
+.scene-body { padding-bottom: 12px; flex: 1; }
+.scene-ts { font-size: 10px; font-weight: 800; color: #FF6B6B; margin-bottom: 2px; }
+.scene-visual { font-size: 13px; color: #e5e5e5; line-height: 1.6; }
+.overlay-tag { display: inline-block; background: rgba(255,0,0,.15); color: #FF6B6B; border-radius: 5px; padding: 1px 7px; font-size: 10px; font-weight: 800; margin-top: 4px; }
+
+/* ── INFO BOXES ── */
+.info-box { border-radius: 10px; padding: 12px 14px; font-size: 12px; line-height: 1.7; }
+.info-box.green { background: #0a1800; border: 1px solid rgba(34,197,94,.2); color: #86efac; }
+.info-box.purple { background: #0d0020; border: 1px solid rgba(167,139,250,.2); color: #c4b5fd; }
+.info-box.red-box { background: #1a0000; border: 1px solid rgba(248,113,113,.2); color: #f87171; }
+.info-box.yellow { background: #1a1200; border: 1px solid rgba(250,204,21,.2); color: #fde68a; }
+.meta-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+.meta-card { background: #0a0a0a; border-radius: 10px; padding: 10px 12px; }
+.meta-key { font-size: 10px; font-weight: 800; margin-bottom: 3px; }
+.meta-val { font-size: 12px; color: #ddd; line-height: 1.5; }
+
+/* ── INSTALL BANNER ── */
+#install-banner { display: none; background: linear-gradient(135deg,#FF6B6B,#FF8E53); padding: 10px 16px; align-items: center; gap: 10px; flex-shrink: 0; }
+#install-banner.show { display: flex; }
+#install-banner span { flex: 1; font-size: 12px; font-weight: 700; color: #fff; }
+#install-btn { background: rgba(255,255,255,.25); border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; font-family: 'Nunito', sans-serif; }
+
+/* ── SPINNER ── */
+.spin { display: inline-block; width: 16px; height: 16px; border: 2px solid #333; border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+
+/* ── LOADING CENTER ── */
+.loading-center { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 40px; color: var(--dim); font-size: 13px; }
+
+/* ── SECTION PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── COLLAPSIBLE ── */
+.collap-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.collap-body { overflow: hidden; transition: max-height .3s ease; }
+
+/* ── COST INFO ── */
+.cost-row { font-size: 11px; color: var(--dim); line-height: 1.9; background: #0a0a0a; border-radius: 8px; padding: 10px 12px; border: 1px solid #1f1f1f; margin-top: 10px; }
+
+/* ── DOWNLOAD BTN ── */
+.dl-btn { display: block; text-align: center; background: linear-gradient(135deg, var(--purple), #818cf8); color: #fff; border-radius: 12px; padding: 12px 24px; font-weight: 800; font-size: 14px; text-decoration: none; margin: 12px auto 0; max-width: 280px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- INSTALL BANNER -->
+  <div id="install-banner">
+    <span>📱 Zainstaluj JAGO AI na ekranie głównym!</span>
+    <button id="install-btn" onclick="installPWA()">Zainstaluj</button>
+  </div>
+
+  <!-- HEADER -->
+  <div id="header">
+    <div>
+      <div class="header-title">JAGO</div>
+      <div class="header-sub">🎠 Sala Zabaw · ☕ Kawiarnia · 🍦 Lodziarnia</div>
+    </div>
+    <div class="header-icon">🎪</div>
+  </div>
+
+  <!-- SCROLL AREA -->
+  <div id="scroll">
+
+    <!-- PAGE: CREATE -->
+    <div class="page active" id="page-create">
+
+      <!-- API KEYS -->
+      <div class="card" id="keys-card">
+        <div class="collap-header" onclick="toggleKeys()">
+          <div class="lbl" style="color:#666;margin-bottom:0">🔑 Klucze API</div>
+          <span id="keys-arrow" style="color:#444;font-size:14px">▼</span>
+        </div>
+        <div class="collap-body" id="keys-body" style="max-height:0">
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px">
+            <div>
+              <div class="lbl" style="color:#FF6B6B">Anthropic API Key (Claude)</div>
+              <input type="password" id="ant-key" class="key-inp" placeholder="sk-ant-..." autocomplete="off"/>
+              <div style="font-size:10px;color:#333">console.anthropic.com → API Keys</div>
+            </div>
+            <div>
+              <div class="lbl" style="color:#74c0fc">OpenAI (GPT Image)</div>
+              <input type="password" id="oai-key" class="key-inp" placeholder="sk-..." autocomplete="off"/>
+              <div style="font-size:10px;color:#333">platform.openai.com → API Keys</div>
+            </div>
+            <div>
+              <div class="lbl" style="color:#a78bfa">Runway ML</div>
+              <input type="password" id="rw-key" class="key-inp" placeholder="key_..." autocomplete="off"/>
+              <div style="font-size:10px;color:#333">app.runwayml.com → Account → API</div>
+            </div>
+            <div class="cost-row">
+              💰 Claude: &lt;$0.01/tekst &nbsp;·&nbsp; GPT Image: ~$0.04/grafika &nbsp;·&nbsp; Runway: ~$0.05/5s
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLATFORM -->
+      <div class="card">
+        <div class="lbl" style="color:#555">1 / Platforma</div>
+        <div class="platform-grid" id="platform-grid"></div>
+      </div>
+
+      <!-- POST TYPE -->
+      <div class="card">
+        <div class="lbl" style="color:#555">2 / Typ contentu</div>
+        <div class="type-grid" id="type-grid"></div>
+      </div>
+
+      <!-- SHORTS STRUCTURE (hidden by default) -->
+      <div class="card" id="shorts-struct-card" style="display:none;border-color:rgba(255,0,0,.25)">
+        <div class="lbl" style="color:#FF4444">▶️ Struktura Shorta</div>
+        <div id="struct-grid"></div>
+      </div>
+
+      <!-- TOPIC -->
+      <div class="card">
+        <div class="lbl" style="color:#555">3 / Temat</div>
+        <div class="topics-wrap" id="topics-wrap"></div>
+        <input type="text" id="topic-inp" class="inp" placeholder="lub wpisz własny temat..." style="margin-bottom:8px"/>
+        <textarea id="notes-inp" class="inp" placeholder="Dodatkowe wskazówki (opcjonalnie)..." rows="2"></textarea>
+      </div>
+
+      <!-- AGENTS STATUS -->
+      <div class="agents-bar" id="agents-bar" style="display:none">
+        <div style="font-size:10px;font-weight:800;color:#444;letter-spacing:1px;width:100%">🚀 AGENCI PRACUJĄ:</div>
+        <div class="apill" id="ap-text"><span class="adot" id="dot-text"></span><span id="lbl-text">Claude Caption</span></div>
+        <div class="apill" id="ap-image" style="display:none"><span class="adot" id="dot-image"></span><span id="lbl-image">GPT Image</span></div>
+        <div class="apill" id="ap-script" style="display:none"><span class="adot" id="dot-script"></span><span id="lbl-script">Skrypt</span></div>
+        <div class="apill" id="ap-video" style="display:none"><span class="adot" id="dot-video"></span><span id="lbl-video">Runway ML</span></div>
+      </div>
+
+      <!-- GENERATE BUTTON -->
+      <button id="gen-btn" disabled onclick="runAgents()">
+        ⚡ Uruchom agentów
+      </button>
+
+    </div><!-- /page-create -->
+
+    <!-- PAGE: RESULTS -->
+    <div class="page" id="page-results">
+      <div class="res-tabs" id="res-tabs"></div>
+      <div id="res-content"></div>
+    </div>
+
+    <!-- PAGE: SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="card">
+        <div class="lbl" style="color:#FF6B6B">🎪 O aplikacji</div>
+        <div style="font-size:13px;color:#888;line-height:1.8">
+          <strong style="color:#f0f0f0">JAGO AI Content Generator</strong><br/>
+          Wersja 1.0 — PWA<br/><br/>
+          Tworzenie contentu social media dla JAGO przy użyciu 3 agentów AI działających równolegle:
+        </div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+          <div style="background:#0a0a0a;border-radius:10px;padding:10px 12px;border:1px solid #1f1f1f;font-size:12px;display:flex;gap:8px;align-items:center">
+            <span>🤖</span><div><div style="font-weight:800;color:#FF6B6B">Claude AI</div><div style="color:#555">Pisze teksty, skrypty, storyboardy</div></div>
+          </div>
+          <div style="background:#0a0a0a;border-radius:10px;padding:10px 12px;border:1px solid #1f1f1f;font-size:12px;display:flex;gap:8px;align-items:center">
+            <span>🖼️</span><div><div style="font-weight:800;color:#74c0fc">GPT Image 1</div><div style="color:#555">Generuje grafiki 9:16</div></div>
+          </div>
+          <div style="background:#0a0a0a;border-radius:10px;padding:10px 12px;border:1px solid #1f1f1f;font-size:12px;display:flex;gap:8px;align-items:center">
+            <span>🎬</span><div><div style="font-weight:800;color:#a78bfa">Runway ML Gen-3</div><div style="color:#555">Generuje klipy video 9:16 (5s)</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="lbl" style="color:#555">📱 Instalacja jako aplikacja</div>
+        <div style="font-size:12px;color:#888;line-height:1.9">
+          <strong style="color:#f0f0f0">Android (Chrome):</strong><br/>
+          1. Otwórz tę stronę w Chrome<br/>
+          2. Dotknij menu ⋮ (trzy kropki)<br/>
+          3. Wybierz "Dodaj do ekranu głównego"<br/>
+          4. Gotowe — ikona JAGO na pulpicie!<br/><br/>
+          <strong style="color:#f0f0f0">Wymaga internetu</strong> do generowania AI.<br/><br/>Potrzebujesz 3 kluczy API: Anthropic, OpenAI i Runway ML.
+        </div>
+      </div>
+      <div class="card">
+        <div class="lbl" style="color:#555">🔗 Platformy</div>
+        <div style="font-size:12px;color:#888;line-height:1.9">
+          📘 <strong style="color:#f0f0f0">Facebook</strong> — posty, promocje<br/>
+          📸 <strong style="color:#f0f0f0">Instagram</strong> — grafiki, Reelsy, Stories<br/>
+          🎵 <strong style="color:#f0f0f0">TikTok</strong> — krótkie video<br/>
+          ▶️ <strong style="color:#f0f0f0">YouTube Shorts</strong> — pełny storyboard<br/>
+          🔍 <strong style="color:#f0f0f0">Google Business</strong> — opisy lokalne
+        </div>
+      </div>
+    </div><!-- /page-settings -->
+
+  </div><!-- /scroll -->
+
+  <!-- BOTTOM NAV -->
+  <nav id="nav">
+    <button class="nav-btn active" id="nav-create" onclick="showPage('create')">
+      <span class="nav-icon">✨</span>
+      <span class="nav-label">Generuj</span>
+    </button>
+    <button class="nav-btn" id="nav-results" onclick="showPage('results')">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Wyniki</span>
+    </button>
+    <button class="nav-btn" id="nav-settings" onclick="showPage('settings')">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Info</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const BRAND = {
+  pl: `JAGO to wyjątkowe miejsce: sala zabaw dla dzieci, klimatyczna kawiarnia dla rodziców, rzemieślnicza lodziarnia i piękny zadaszony ogródek. Marka jest radosna, ciepła, rodzinna, kolorowa.`,
+  en: `JAGO is a family venue: colorful indoor playground for kids, cozy café for parents, artisan ice cream parlor and a beautiful covered garden terrace. Brand is joyful, warm, family-friendly, vibrant.`,
+  colors: "warm oranges, playful yellows, soft pinks, cream whites",
+  style: "bright, cheerful, family-friendly, cozy, summery",
+};
+
+const PLATFORMS = [
+  { id:"facebook",  label:"Facebook",       icon:"📘", color:"#1877F2" },
+  { id:"instagram", label:"Instagram",      icon:"📸", color:"#E1306C" },
+  { id:"tiktok",    label:"TikTok",         icon:"🎵", color:"#69C9D0" },
+  { id:"shorts",    label:"YT Shorts",      icon:"▶️", color:"#FF0000" },
+  { id:"google",    label:"Google Biz",     icon:"🔍", color:"#4285F4" },
+  { id:"all",       label:"Wszystkie",      icon:"🌐", color:"#a78bfa" },
+];
+
+const POST_TYPES = [
+  { id:"text",   label:"Post tekstowy",  icon:"✍️",  desc:"Tylko tekst" },
+  { id:"image",  label:"Grafika AI",     icon:"🖼️",  desc:"Tekst + GPT Image" },
+  { id:"reel",   label:"Reel / TikTok",  icon:"🎬",  desc:"Video 9:16 + skrypt" },
+  { id:"shorts", label:"YT Shorts",      icon:"▶️",  desc:"Storyboard + klip" },
+];
+
+const QUICK_TOPICS = [
+  "🌞 Idealny weekend","☕ Kawa dla rodziców","🍦 Nowe smaki lodów",
+  "🎂 Urodziny w JAGO","🌿 Ogródek otwarty","🎉 Nowości",
+  "🏖️ Wakacje","🍂 Jesień","🎄 Święta","💝 Dzień Dziecka",
+  "🥐 Śniadanie","🎠 Sala zabaw",
+];
+
+const SHORTS_STRUCTURES = [
+  { id:"hook_reveal",  label:"Hook → Reveal",   desc:"Zaskakujące otwarcie + JAGO" },
+  { id:"day_in_life",  label:"Dzień w JAGO",    desc:"Sekwencja chwil z dnia" },
+  { id:"before_after", label:"Przed → Po",      desc:"Transformacja nastroju" },
+  { id:"top3",         label:"TOP 3 powody",    desc:"Lista powodów by odwiedzić" },
+  { id:"pov",          label:"POV: Przybycie",  desc:"Perspektywa pierwszej osoby" },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let state = {
+  platform: null, postType: null, topic: "", notes: "",
+  shortsStyle: "hook_reveal", running: false,
+  results: { text: null, image: null, script: null, video: null },
+  agStatus: { text:"idle", image:"idle", script:"idle", video:"idle" },
+  activeResultTab: "text",
+  keysOpen: false,
+};
+
+let deferredInstall = null;
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  buildPlatformGrid();
+  buildTypeGrid();
+  buildStructGrid();
+  buildTopics();
+  bindTopicInput();
+  bindNoteInput();
+  updateGenBtn();
+});
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstall = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+
+function installPWA() {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(() => {
+    document.getElementById('install-banner').classList.remove('show');
+    deferredInstall = null;
+  });
+}
+
+// ── BUILD UI ──────────────────────────────────────────────────────────────────
+function buildPlatformGrid() {
+  const el = document.getElementById('platform-grid');
+  el.innerHTML = PLATFORMS.map(p => `
+    <button class="platform-btn" id="pbtn-${p.id}" onclick="selectPlatform('${p.id}')" style="border-color:${p.id===state.platform?p.color:'var(--border)'};background:${p.id===state.platform?p.color+'18':'#111'}">
+      <span class="p-icon">${p.icon}</span>
+      <span class="p-label" style="color:${p.id===state.platform?p.color:'var(--muted)'}">${p.label}</span>
+    </button>`).join('');
+}
+
+function buildTypeGrid() {
+  const el = document.getElementById('type-grid');
+  el.innerHTML = POST_TYPES.map(t => `
+    <button class="type-btn ${state.postType===t.id?'active':''}" onclick="selectType('${t.id}')">
+      <span class="t-icon">${t.icon}</span>
+      <span class="t-label">${t.label}</span>
+      <span class="t-desc">${t.desc}</span>
+    </button>`).join('');
+}
+
+function buildStructGrid() {
+  const el = document.getElementById('struct-grid');
+  el.innerHTML = SHORTS_STRUCTURES.map(s => `
+    <button class="struct-btn ${state.shortsStyle===s.id?'active':''}" onclick="selectStruct('${s.id}')">
+      <span class="struct-dot"></span>
+      <div><div class="struct-name">${s.label}</div><div class="struct-desc">${s.desc}</div></div>
+    </button>`).join('');
+}
+
+function buildTopics() {
+  const el = document.getElementById('topics-wrap');
+  el.innerHTML = QUICK_TOPICS.map(t => `
+    <button class="topic-chip ${state.topic===t?'active':''}" onclick="selectTopic('${escHtml(t)}')">${t}</button>`).join('');
+}
+
+function escHtml(s) { return s.replace(/'/g, "\\'"); }
+
+// ── INTERACTIONS ──────────────────────────────────────────────────────────────
+function selectPlatform(id) {
+  state.platform = id;
+  if (id === 'shorts') state.postType = 'shorts';
+  buildPlatformGrid();
+  buildTypeGrid();
+  updateShortsCard();
+  updateGenBtn();
+}
+
+function selectType(id) {
+  state.postType = id;
+  if (id === 'shorts') state.platform = state.platform || 'shorts';
+  buildTypeGrid();
+  updateShortsCard();
+  updateGenBtn();
+}
+
+function selectStruct(id) {
+  state.shortsStyle = id;
+  buildStructGrid();
+}
+
+function selectTopic(t) {
+  state.topic = t;
+  document.getElementById('topic-inp').value = t;
+  buildTopics();
+  updateGenBtn();
+}
+
+function bindTopicInput() {
+  document.getElementById('topic-inp').addEventListener('input', e => {
+    state.topic = e.target.value;
+    buildTopics();
+    updateGenBtn();
+  });
+}
+
+function bindNoteInput() {
+  document.getElementById('notes-inp').addEventListener('input', e => {
+    state.notes = e.target.value;
+  });
+}
+
+function updateShortsCard() {
+  document.getElementById('shorts-struct-card').style.display =
+    state.postType === 'shorts' ? 'block' : 'none';
+}
+
+function updateGenBtn() {
+  const btn = document.getElementById('gen-btn');
+  const ok = state.platform && state.postType && state.topic.trim() && !state.running;
+  btn.disabled = !ok;
+  if (ok) {
+    const isS = state.postType === 'shorts';
+    btn.style.background = isS
+      ? 'linear-gradient(135deg,#FF0000,#FF6B6B)'
+      : 'linear-gradient(135deg,#FF6B6B,#FF8E53)';
+    btn.style.color = '#fff';
+    btn.style.boxShadow = '0 4px 20px rgba(255,107,107,.25)';
+    btn.innerHTML = isS ? '▶️ Generuj YouTube Short' : '⚡ Uruchom wszystkich agentów';
+  } else {
+    btn.style.boxShadow = 'none';
+    btn.innerHTML = '⚡ Uruchom wszystkich agentów';
+  }
+}
+
+// ── KEYS ──────────────────────────────────────────────────────────────────────
+function toggleKeys() {
+  state.keysOpen = !state.keysOpen;
+  const body = document.getElementById('keys-body');
+  const arrow = document.getElementById('keys-arrow');
+  body.style.maxHeight = state.keysOpen ? '400px' : '0';
+  arrow.textContent = state.keysOpen ? '▲' : '▼';
+}
+
+function getKey(id) { return document.getElementById(id).value.trim(); }
+
+// ── PAGES ─────────────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.getElementById(`nav-${name}`).classList.add('active');
+  document.getElementById('scroll').scrollTop = 0;
+}
+
+// ── AGENT STATUS ──────────────────────────────────────────────────────────────
+const COLORS = { text:'#FF6B6B', image:'#74c0fc', script:'#a9e34b', video:'#a78bfa' };
+
+function setAgStatus(agent, status, extra) {
+  state.agStatus[agent] = status;
+  const pill = document.getElementById(`ap-${agent}`);
+  const dot  = document.getElementById(`dot-${agent}`);
+  const lbl  = document.getElementById(`lbl-${agent}`);
+  if (!pill) return;
+
+  const c = COLORS[agent];
+  const bgs   = { idle:'var(--bg)', loading:'#0f0800', done:'#001a0a', error:'#1a0000' };
+  const bords = { idle:'var(--border)', loading:c, done:'#22c55e', error:'#f87171' };
+  const cols  = { idle:'var(--dim)', loading:c, done:'#22c55e', error:'#f87171' };
+  const dotC  = { idle:'var(--dim)', loading:c, done:'#22c55e', error:'#f87171' };
+
+  pill.style.background = bgs[status];
+  pill.style.borderColor = bords[status];
+  lbl.style.color = cols[status];
+  dot.style.background = dotC[status];
+  dot.style.boxShadow = status==='loading' ? `0 0 6px ${c}` : 'none';
+  dot.style.animation = status==='loading' ? 'pulse 1s infinite' : 'none';
+}
+
+function showAgentsBar(show) {
+  document.getElementById('agents-bar').style.display = show ? 'flex' : 'none';
+}
+
+function showAgentPill(agent, show) {
+  document.getElementById(`ap-${agent}`).style.display = show ? 'flex' : 'none';
+}
+
+// ── API CALLS ─────────────────────────────────────────────────────────────────
+async function callClaude(prompt) {
+  const antKey = document.getElementById('ant-key')?.value?.trim() || '';
+  if (!antKey) throw new Error('Brak klucza Anthropic API! Otwórz sekcję Klucze API i wpisz klucz sk-ant-...');
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': antKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1400, messages:[{role:'user',content:prompt}] })
+  });
+  const d = await r.json();
+  if (d.error) throw new Error('Claude: ' + d.error.message);
+  return d.content?.map(b=>b.text||'').join('') || '';
+}
+
+async function callDalle(prompt, key) {
+  // OpenAI blocks requests from local files (content:// / file://)
+  // We try direct first, then fall back to a CORS proxy
+  const body = JSON.stringify({ model:'gpt-image-1', prompt, n:1, size:'1024x1792', quality:'standard' });
+  const headers = {'Content-Type':'application/json','Authorization':`Bearer ${key}`};
+
+  let r;
+  try {
+    r = await fetch('https://api.openai.com/v1/images/generations', { method:'POST', headers, body });
+  } catch(e) {
+    // CORS blocked (local file) — try proxy
+    r = await fetch('https://corsproxy.io/?url=https://api.openai.com/v1/images/generations', { method:'POST', headers, body });
+  }
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message);
+  const img = d.data[0];
+  if (img.url) return img.url;
+  if (img.b64_json) return 'data:image/png;base64,' + img.b64_json;
+  throw new Error('Brak obrazu w odpowiedzi');
+}
+
+async function runwayStart(prompt, key) {
+  const body = JSON.stringify({ model:'gen3a_turbo', promptText:prompt, duration:5, ratio:'768:1344' });
+  const headers = {'Content-Type':'application/json','Authorization':`Bearer ${key}`,'X-Runway-Version':'2024-11-06'};
+  let r;
+  try {
+    r = await fetch('https://api.dev.runwayml.com/v1/image_to_video', { method:'POST', headers, body });
+  } catch(e) {
+    r = await fetch('https://corsproxy.io/?url=https://api.dev.runwayml.com/v1/image_to_video', { method:'POST', headers, body });
+  }
+  const d = await r.json();
+  if (!d.id) throw new Error(d.error?.message || 'Brak ID Runway');
+  return d.id;
+}
+
+async function runwayPoll(id, key, onProg) {
+  for (let i = 0; i < 50; i++) {
+    await new Promise(r => setTimeout(r, 5000));
+    let pollR;
+    try {
+      pollR = await fetch(`https://api.dev.runwayml.com/v1/tasks/${id}`, { headers:{'Authorization':`Bearer ${key}`,'X-Runway-Version':'2024-11-06'} });
+    } catch(e) {
+      pollR = await fetch(`https://corsproxy.io/?url=https://api.dev.runwayml.com/v1/tasks/${id}`, { headers:{'Authorization':`Bearer ${key}`,'X-Runway-Version':'2024-11-06'} });
+    }
+    const d = await pollR.json();
+    onProg(Math.round(((i+1)/50)*100), d.status);
+    if (d.status==='SUCCEEDED') return d.output?.[0] || null;
+    if (d.status==='FAILED') throw new Error('Runway: generowanie nie powiodło się');
+  }
+  throw new Error('Runway: timeout');
+}
+
+// ── PROMPTS ───────────────────────────────────────────────────────────────────
+function captionPrompt() {
+  const plat = PLATFORMS.find(p=>p.id===state.platform);
+  const lengths = { facebook:350, instagram:250, tiktok:120, shorts:180, google:400, all:300 };
+  const hts = { facebook:'2-3 hashtagi', instagram:'10-15 hashtagów', tiktok:'5-8 hashtagów', shorts:'brak hashtagów (będą w opisie YT)', google:'bez hashtagów', all:'3-5 hashtagów' };
+  return `Jesteś ekspertem marketingu. Napisz post dla JAGO (${BRAND.pl}) na ${plat?.label||'social media'}.
+Typ: ${POST_TYPES.find(t=>t.id===state.postType)?.label||'post'}. Temat: "${state.topic}".${state.notes?' Wskazówki: '+state.notes:''}
+Ton: radosny, rodzinny, ciepły, z emoji. Język: polski. ~${lengths[state.platform]||300} znaków. ${hts[state.platform]||''}.
+Zwróć TYLKO treść posta.`;
+}
+
+function imagePrompt() {
+  return `Generate a GPT image prompt (max 180 chars) for JAGO social post.
+JAGO: ${BRAND.en}. Style: ${BRAND.style}. Colors: ${BRAND.colors}. Topic: "${state.topic}".
+Vertical 9:16. No text. No logos. Photorealistic cheerful family venue.${state.postType==='shorts'?' Cinematic opening frame.':''}
+Return ONLY the prompt.`;
+}
+
+function reelScriptPrompt() {
+  return `Stwórz scenariusz 5-sekundowego Reel/TikTok dla JAGO. Temat: "${state.topic}".${state.notes||''}
+Odpowiedz TYLKO JSON: {"hook":"maks 8 słów","scenes":["scena 0-2s","scena 2-4s","scena 4-5s"],"cta":"wezwanie","music_vibe":"klimat muzyki","runway_prompt":"cinematic English prompt max 150 chars"}`;
+}
+
+function shortsScriptPrompt() {
+  return `Jesteś ekspertem viral YouTube Shorts. Stwórz PEŁNY scenariusz 15-30s dla JAGO.
+JAGO: ${BRAND.pl}. Temat: "${state.topic}". Struktura: ${state.shortsStyle}.${state.notes?' '+state.notes:''}
+Odpowiedz TYLKO poprawnym JSON:
+{"hook":"pierwsze zdanie maks 7 słów","duration":"np. 20s","scenes":[{"timestamp":"0-3s","visual":"opis ujęcia","text_overlay":"tekst lub null"},{"timestamp":"3-8s","visual":"opis","text_overlay":null},{"timestamp":"8-15s","visual":"opis","text_overlay":null},{"timestamp":"15-20s","visual":"finał","text_overlay":"CTA"}],"cta":"głosowe CTA","music_vibe":"klimat muzyki","youtube_title":"clickbaitowy tytuł maks 70 znaków","description":"opis YouTube 3-4 zdania po polsku","hashtags":"#JAGO #salaZabaw #Shorts #rodzina #dzieci","runway_prompt":"cinematic opening English max 150 chars","editing_tips":"3 wskazówki montażu CapCut/DaVinci"}`;
+}
+
+// ── ORCHESTRATOR ──────────────────────────────────────────────────────────────
+async function runAgents() {
+  if (state.running) return;
+  state.running = true;
+  state.results = { text:null, image:null, script:null, video:null };
+  updateGenBtn();
+
+  const isShorts = state.postType === 'shorts';
+  const needImg  = ['image','reel','shorts'].includes(state.postType);
+  const needVid  = ['reel','shorts'].includes(state.postType);
+
+  // Show agent bar
+  showAgentsBar(true);
+  setAgStatus('text','loading');
+  showAgentPill('image', needImg);
+  showAgentPill('script', needVid);
+  showAgentPill('video', needVid);
+  if (needImg) setAgStatus('image','loading');
+  if (needVid) { setAgStatus('script','loading'); setAgStatus('video','idle'); }
+
+  document.getElementById('lbl-script').textContent = isShorts ? 'Storyboard' : 'Skrypt';
+
+  // Update generate button to spinner
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Generowanie...';
+  btn.style.background = '#1a1a1a';
+  btn.style.color = '#555';
+
+  try {
+    // Parallel: caption + image prompt + script
+    const [caption, imgPromptRaw, scriptRaw] = await Promise.all([
+      callClaude(captionPrompt()),
+      needImg ? callClaude(imagePrompt()) : Promise.resolve(null),
+      isShorts ? callClaude(shortsScriptPrompt()) : needVid ? callClaude(reelScriptPrompt()) : Promise.resolve(null),
+    ]);
+
+    state.results.text = caption;
+    setAgStatus('text','done');
+
+    // Parse script
+    let script = null;
+    if (scriptRaw) {
+      try {
+        script = JSON.parse(scriptRaw.replace(/```json|```/g,'').trim());
+        state.results.script = script;
+        setAgStatus('script','done');
+      } catch(e) {
+        state.results.script = { _raw: scriptRaw, _err: 'Błąd parsowania JSON' };
+        setAgStatus('script','error');
+      }
+    }
+
+    // GPT Image 1
+    if (needImg && imgPromptRaw) {
+      const oaiKey = getKey('oai-key');
+      if (!oaiKey) {
+        state.results.image = { prompt: imgPromptRaw, err: 'Brak klucza OpenAI' };
+        setAgStatus('image','error');
+      } else {
+        try {
+          const url = await callDalle(imgPromptRaw, oaiKey);
+          state.results.image = { prompt: imgPromptRaw, url };
+          setAgStatus('image','done');
+        } catch(e) {
+          state.results.image = { prompt: imgPromptRaw, err: e.message };
+          setAgStatus('image','error');
+        }
+      }
+    }
+
+    // Runway ML
+    if (needVid && script && !script._err) {
+      const rwKey = getKey('rw-key');
+      const rwPrompt = script.runway_prompt || state.topic;
+      if (!rwKey) {
+        state.results.video = { err: 'Brak klucza Runway ML' };
+        setAgStatus('video','error');
+      } else {
+        setAgStatus('video','loading');
+        try {
+          const tid = await runwayStart(rwPrompt, rwKey);
+          const vurl = await runwayPoll(tid, rwKey, (pct, st) => {
+            document.getElementById('lbl-video').textContent = `Runway ${pct}%`;
+          });
+          state.results.video = { url: vurl, script };
+          setAgStatus('video','done');
+        } catch(e) {
+          state.results.video = { err: e.message };
+          setAgStatus('video','error');
+        }
+      }
+    }
+
+  } catch(e) {
+    state.results.text = null;
+    setAgStatus('text','error');
+  }
+
+  state.running = false;
+  updateGenBtn();
+  buildResultsPage();
+  showPage('results');
+}
+
+// ── RESULTS ───────────────────────────────────────────────────────────────────
+function buildResultsPage() {
+  const isShorts = state.postType === 'shorts';
+  const needImg  = ['image','reel','shorts'].includes(state.postType);
+  const needVid  = ['reel','shorts'].includes(state.postType);
+
+  // Build tabs
+  const tabs = [];
+  if (state.results.text)   tabs.push({ id:'text',   label:'✍️ Tekst' });
+  if (needImg && state.results.image) tabs.push({ id:'image', label:'🖼️ Grafika' });
+  if (needVid && state.results.script) tabs.push({ id:'script', label: isShorts ? '▶️ Storyboard' : '🎬 Skrypt' });
+  if (needVid && state.results.video) tabs.push({ id:'video', label:'📹 Klip' });
+
+  if (!state.activeResultTab || !tabs.find(t=>t.id===state.activeResultTab)) {
+    state.activeResultTab = tabs[0]?.id || 'text';
+  }
+
+  document.getElementById('res-tabs').innerHTML = tabs.map(t =>
+    `<button class="res-tab ${state.activeResultTab===t.id?'active':''}" onclick="switchResTab('${t.id}')">${t.label}</button>`
+  ).join('');
+
+  renderResContent(state.activeResultTab);
+}
+
+function switchResTab(id) {
+  state.activeResultTab = id;
+  document.querySelectorAll('.res-tab').forEach(b => {
+    b.classList.toggle('active', b.textContent.includes(
+      id==='text'?'Tekst':id==='image'?'Grafika':id==='script'?'Storyboard'||'Skrypt':'Klip'
+    ));
+  });
+  // Simpler: rebuild tabs
+  buildResultsPage();
+}
+
+function renderResContent(tab) {
+  const el = document.getElementById('res-content');
+  const isShorts = state.postType === 'shorts';
+
+  if (tab === 'text') {
+    const r = state.results.text;
+    el.innerHTML = `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:800;color:#FF6B6B">✍️ Claude AI – Tekst</div>
+          <button class="copy-btn" onclick="copyText(this,'${encodeURIComponent(r||'')}')">📋 Kopiuj</button>
+        </div>
+        <div class="result-text">${r ? htmlEsc(r) : '<span style="color:var(--dim)">Błąd generowania</span>'}</div>
+      </div>`;
+  }
+
+  else if (tab === 'image') {
+    const r = state.results.image;
+    el.innerHTML = `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:800;color:#74c0fc">🖼️ GPT Image 1</div>
+          ${r?.url ? `<a href="${r.url}" target="_blank" style="font-size:11px;font-weight:800;color:#74c0fc;text-decoration:none;border:1px solid #74c0fc44;padding:4px 10px;border-radius:8px;background:rgba(116,192,252,.1)">⬇️ Pobierz</a>` : ''}
+        </div>
+        ${r?.prompt ? `<div style="font-size:10px;color:#333;background:#0a0a0a;padding:8px 10px;border-radius:8px;margin-bottom:12px;border:1px solid #1f1f1f;word-break:break-word"><strong style="color:#74c0fc">Prompt:</strong> ${htmlEsc(r.prompt)}</div>` : ''}
+        ${r?.url ? `<img src="${r.url}" class="gen-img" alt="AI grafika"/>` : ''}
+        ${r?.err ? `<div class="info-box red-box">❌ ${htmlEsc(r.err)}${!getKey('oai-key')?'<br/><span style="color:#666">→ Podaj klucz OpenAI API</span>':''}</div>` : ''}
+      </div>`;
+  }
+
+  else if (tab === 'script') {
+    const r = state.results.script;
+    if (!r || r._err) {
+      el.innerHTML = `<div class="card"><div class="info-box red-box">❌ ${r?._err||'Błąd skryptu'}</div></div>`;
+      return;
+    }
+    if (isShorts) {
+      el.innerHTML = renderStoryboard(r);
+    } else {
+      el.innerHTML = renderReelScript(r);
+    }
+  }
+
+  else if (tab === 'video') {
+    const r = state.results.video;
+    el.innerHTML = `
+      <div class="card">
+        <div style="font-size:11px;font-weight:800;color:#a78bfa;margin-bottom:12px">🎬 Runway ML Gen-3</div>
+        ${r?.url ? `
+          <video src="${r.url}" controls autoplay loop muted playsinline class="gen-video"></video>
+          <a href="${r.url}" download="jago-klip.mp4" target="_blank" class="dl-btn">⬇️ Pobierz klip MP4</a>
+          ${isShorts ? `<div class="info-box purple" style="margin-top:12px">
+            <strong>▶️ Jak złożyć Shorta:</strong><br/>
+            1. Pobierz klip AI (5s) – ujęcie otwierające<br/>
+            2. Nagraj resztę telefonem wg storyboardu<br/>
+            3. Zmontuj w CapCut wg wskazówek<br/>
+            4. Dodaj muzykę, napisy, CTA<br/>
+            5. Wgraj z tytułem i opisem ze storyboardu
+          </div>` : ''}
+        ` : ''}
+        ${r?.err ? `<div class="info-box red-box">❌ ${htmlEsc(r.err)}${!getKey('rw-key')?'<br/><span style="color:#666">→ Podaj klucz Runway ML</span>':''}</div>` : ''}
+      </div>`;
+  }
+}
+
+function renderStoryboard(s) {
+  const scenes = (s.scenes||[]).map((sc, i) => {
+    const visual = typeof sc==='string' ? sc : (sc?.visual||'');
+    const ts = typeof sc==='object' ? sc.timestamp : null;
+    const overlay = typeof sc==='object' ? sc.text_overlay : null;
+    const isLast = i === (s.scenes.length-1);
+    return `
+      <div class="scene-item">
+        <div style="display:flex;flex-direction:column;align-items:center;min-width:28px">
+          <div class="scene-num">${i+1}</div>
+          ${!isLast ? '<div class="scene-line"></div>' : ''}
+        </div>
+        <div class="scene-body">
+          ${ts ? `<div class="scene-ts">${htmlEsc(ts)}</div>` : ''}
+          <div class="scene-visual">${htmlEsc(visual)}</div>
+          ${overlay ? `<div class="overlay-tag">📝 "${htmlEsc(overlay)}"</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="card">
+      <div class="lbl" style="color:#FF0000">🎯 Hook</div>
+      <div style="font-size:15px;font-weight:800;color:#f0f0f0;margin-bottom:0">${htmlEsc(s.hook||'')}</div>
+    </div>
+    <div class="card">
+      <div class="meta-grid" style="margin-bottom:12px">
+        <div class="meta-card" style="border:1px solid rgba(255,107,107,.2)">
+          <div class="meta-key" style="color:#FF6B6B">⏱️ Czas</div>
+          <div class="meta-val">${htmlEsc(s.duration||'15–30s')}</div>
+        </div>
+        <div class="meta-card" style="border:1px solid rgba(167,139,250,.2)">
+          <div class="meta-key" style="color:#a78bfa">🎵 Muzyka</div>
+          <div class="meta-val">${htmlEsc(s.music_vibe||'')}</div>
+        </div>
+      </div>
+      <div class="lbl" style="color:#FF0000">🎬 Storyboard</div>
+      ${scenes}
+    </div>
+    <div class="card">
+      <div class="meta-grid">
+        <div class="meta-card" style="border:1px solid rgba(255,0,0,.2)">
+          <div class="meta-key" style="color:#FF4444">📢 CTA</div>
+          <div class="meta-val">${htmlEsc(s.cta||'')}</div>
+        </div>
+        <div class="meta-card" style="border:1px solid #222">
+          <div class="meta-key" style="color:#888">🔖 Tytuł YT</div>
+          <div class="meta-val">${htmlEsc(s.youtube_title||'')}</div>
+        </div>
+      </div>
+    </div>
+    ${s.description ? `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="lbl" style="color:#888;margin-bottom:0">📄 Opis YouTube</div>
+        <button class="copy-btn" onclick="copyText(this,'${encodeURIComponent((s.description||'')+'\\n\\n'+(s.hashtags||''))}')">📋 Kopiuj</button>
+      </div>
+      <div class="result-text" style="font-size:12px">${htmlEsc(s.description)}</div>
+      ${s.hashtags ? `<div style="margin-top:8px;font-size:11px;color:#FF4444;font-weight:700;word-break:break-word">${htmlEsc(s.hashtags)}</div>` : ''}
+    </div>` : ''}
+    ${s.runway_prompt ? `
+    <div class="info-box purple">
+      <strong>🎬 Runway Prompt:</strong><br/>${htmlEsc(s.runway_prompt)}
+    </div>` : ''}
+    ${s.editing_tips ? `
+    <div class="info-box green" style="margin-top:10px">
+      <strong>✂️ Wskazówki montażu:</strong><br/>${htmlEsc(s.editing_tips)}
+    </div>` : ''}`;
+}
+
+function renderReelScript(s) {
+  const scenes = (s.scenes||[]).map((sc,i) => {
+    const text = typeof sc==='string' ? sc : (sc?.visual||JSON.stringify(sc));
+    return `<div style="display:flex;gap:8px;margin-bottom:8px;align-items:flex-start">
+      <span style="background:rgba(169,227,75,.15);color:#a9e34b;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:800;flex-shrink:0">#${i+1}</span>
+      <span style="font-size:13px;color:#ccc;line-height:1.6">${htmlEsc(text)}</span>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="card">
+      ${[['hook','🎣 Hook','#a9e34b'],['cta','📢 CTA','#a9e34b'],['music_vibe','🎵 Muzyka','#a78bfa'],['runway_prompt','🎬 Runway Prompt','#a78bfa']].filter(([k])=>s[k]).map(([k,label,c])=>`
+        <div style="margin-bottom:10px">
+          <div class="lbl" style="color:${c}">${label}</div>
+          <div style="font-size:13px;color:#ccc;word-break:break-word">${htmlEsc(String(s[k]||''))}</div>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="lbl" style="color:#a9e34b">🎬 Sceny</div>
+      ${scenes}
+    </div>`;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function htmlEsc(s) {
+  if (typeof s !== 'string') return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function copyText(btn, encoded) {
+  const text = decodeURIComponent(encoded);
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ Skopiowano';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '📋 Kopiuj'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+// ── PWA MANIFEST (inline) ─────────────────────────────────────────────────────
+const manifest = {
+  name: "JAGO AI Content Generator",
+  short_name: "JAGO AI",
+  description: "Generator contentu social media dla JAGO",
+  start_url: ".",
+  display: "standalone",
+  orientation: "portrait",
+  background_color: "#0c0c0c",
+  theme_color: "#FF6B6B",
+  icons: [{
+    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FF6B6B'/><text y='.9em' font-size='70' x='50%' text-anchor='middle' dominant-baseline='hanging'>🎪</text></svg>",
+    sizes: "192x192", type: "image/svg+xml"
+  }]
+};
+const manifestBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const manifestURL = URL.createObjectURL(manifestBlob);
+const link = document.createElement('link');
+link.rel = 'manifest'; link.href = manifestURL;
+document.head.appendChild(link);
+
+// ── SERVICE WORKER ────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('activate', e => clients.claim());
+    self.addEventListener('fetch', e => {
+      if (e.request.url.includes('api.anthropic.com') ||
+          e.request.url.includes('api.openai.com') ||
+          e.request.url.includes('runwayml.com')) return;
+      e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    });`;
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+}
+</script>
+</body>
+</html>
